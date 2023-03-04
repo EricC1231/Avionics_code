@@ -1,5 +1,8 @@
 .PHONY: *
 
+PORT=/dev/ttyACM0
+BAUD=9600
+
 help:
 	@echo "Usage: make [target]"
 	@echo ""
@@ -20,11 +23,13 @@ help:
 	@echo "    Clean the project dependencies."
 	@echo "make upload"
 	@echo "    Upload the project to the device."
+	@echo "make monitor"
+	@echo "    Monitor the device serial port."
 	@echo "make build"
 	@echo "    Build the project."
 
 tidy:
-	clang-tidy-15 --config-file=.clang-tidy src/* include/*
+	clang-tidy-15 --config-file=.clang-tidy src/*.cpp include/*.h
 
 verify:
 	clang-tidy-15 --config-file=.clang-tidy --verify-config
@@ -43,6 +48,9 @@ clean:
 
 upload:
 	pio run -t upload
+
+monitor:
+	pio device monitor -p $(PORT) -b $(BAUD)
 
 build:
 	pio run
