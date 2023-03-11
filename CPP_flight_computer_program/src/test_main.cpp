@@ -37,10 +37,14 @@ int test_main()
 
 void setUp(void) // run before each test
 	{
+		for(int i = 1; i = 11; i++){
+			write_data_chunk_to_fram(1,1,1,1,1,1,1,1,1,1,1);
+		}
 	}
 
 void tearDown(void) // run after each test
 	{
+
 	}
 
 #endif // TESTMODE

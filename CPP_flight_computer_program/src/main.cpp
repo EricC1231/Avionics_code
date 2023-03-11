@@ -463,21 +463,9 @@ void setup()
 
 void loop()
 	{
-<<<<<<< HEAD
 	// write_temperature_to_fram(12.34);
 	debug_data();
 	wdt.feed();
 	select_flight_mode(rocket_state);
 	// println(read_temperature_from_fram(0x10));
-=======
-	float notanumber = std::numeric_limits<float>::quiet_NaN();
-	wdt.feed();
-	debug_data();
-	select_flight_mode(rocket_state);
-	write_data_chunk_to_fram(
-	    millis(), rocket_state,
-	    kx134_accel_x, kx134_accel_y, kx134_accel_z,
-	    notanumber, notanumber, notanumber,
-	    rocket_altitude, get_bmp280_pressure(), get_thermocouple_external_temperature());
->>>>>>> cb246cc0c8c7291e23c4099b66599b745082cb42
 	}
