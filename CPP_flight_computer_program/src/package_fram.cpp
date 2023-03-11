@@ -22,6 +22,38 @@ int init_fram_package()
 	return init_fram();
 	}
 
+int write_test_data_to_fram()
+	{
+	int result = 0;
+	result += write_to_fram(28, 0x20);
+	result += write_to_fram(29, 0x21);
+	result += write_to_fram(30, 0x22);
+	result += write_to_fram(31, 0x23);
+	result += write_to_fram(32, 0x24);
+
+	if (result == 0)
+		{
+		return EXIT_SUCCESS;
+		}
+	return EXIT_FAILURE;
+	}
+
+int read_test_data_from_fram()
+	{
+	int result = 0;
+	result += read_from_fram(0x20);
+	result += read_from_fram(0x21);
+	result += read_from_fram(0x22);
+	result += read_from_fram(0x23);
+	result += read_from_fram(0x24);
+
+	if (result == 150)
+		{
+		return EXIT_SUCCESS;
+		}
+	return EXIT_FAILURE;
+	}
+
 void print_current_sensor_chunk(bool printheader)
 	{
 	if (printheader)
@@ -35,7 +67,7 @@ void print_current_sensor_chunk(bool printheader)
 	char print_string[100];
 	sprintf(
 	    print_string,
-	    "%x,%lu,%u,%f,%f,%f,%f,%f,%f,%f,%f,%f",
+	    "%lx,%lu,%u,%f,%f,%f,%f,%f,%f,%f,%f,%f",
 	    fram_cursor, sensor_chunk.timestamp, sensor_chunk.current_state,
 	    (float)sensor_chunk.accl_x, (float)sensor_chunk.accl_y, (float)sensor_chunk.accl_z,
 	    (float)sensor_chunk.gyro_x, (float)sensor_chunk.gyro_y, (float)sensor_chunk.gyro_z,

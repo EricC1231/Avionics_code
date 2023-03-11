@@ -1,5 +1,8 @@
 #include "SparkFun_Qwiic_KX13X.h"
 
+// As the rocket accelerates upwards
+// the acceleration in the z direction becomes more nad more positive
+
 QwiicKX134 kxAccel;
 outputData accel_data;
 
@@ -39,7 +42,7 @@ float get_kx134_accel_z()
 	{
 	// TODO: calibrate the sensor with angle to get the cos and sin component of the vector
 	accel_data = kxAccel.getAccelData();
-	return accel_data.zData * g; // becuase accelereation up towards the sky is negative in the z direction
+	return accel_data.zData * g;
 	}
 
 bool confirm_acceleration_z()
