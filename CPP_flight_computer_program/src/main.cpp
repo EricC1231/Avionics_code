@@ -56,7 +56,7 @@ YOU CAN ONLY HAVE 2 INSTANCES OF THIS OBJ AT 1 TIME (3 IF MEGA)
         that you disable interrupts while you transfer data o and from that other device.
         Use cli() to disable interrupts and sei() to readable them.
 */
-const uint16_t RF95_CS { 30 };
+const uint16_t RF95_CS { 10 };
 const uint16_t RF95_int { 32 };
 static RH_RF95 RF95(RF95_CS, RF95_int);
 const uint32_t RF95_Max_message_length = RF95.maxMessageLength();
@@ -213,7 +213,7 @@ void powered_flight_mode()
 		}
 	}
 
-/*
+/**
  * @note - this function will take a little under a second to run
  */
 int apogee_check()
@@ -415,6 +415,54 @@ int check_zombie_mode()
 	return EXIT_FAILURE;
 	}
 
+void UDP_Send(const char* Data, const uint16_t& Timeout)
+	{
+	RF95.send(reinterpret_cast<const uint8_t*>(Data), strlen(Data) + 1);
+	RF95.waitPacketSent(Timeout);
+	}
+
+const char* UDP_Receive(const uint16_t& Timeout)
+	{
+	RF95.waitAvailableTimeout(Timeout);
+	uint8_t Buffer[RF95_Max_message_length];
+	uint8_t Length = sizeof(Buffer);
+
+	return RF95.recv(Buffer, &Length) ? reinterpret_cast<const char*>(Buffer) : "";
+	}
+
+void RF95_Set_modem_config(const uint16_t& Index)
+	{
+	/*
+	LoRa Chirp Options:
+	typedef enum
+	{
+	    Bw125Cr45Sf128 = 0,	   //< Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on. Default medium range
+	    Bw500Cr45Sf128,	           //< Bw = 500 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on. Fast+short range
+	    Bw31_25Cr48Sf512,	   //< Bw = 31.25 kHz, Cr = 4/8, Sf = 512chips/symbol, CRC on. Slow+long range
+	    Bw125Cr48Sf4096,           //< Bw = 125 kHz, Cr = 4/8, Sf = 4096chips/symbol, CRC on. Slow+long range
+	} ModemConfigChoice;
+	*/
+	switch (Index)
+		{
+	case 0:
+		// this is default already
+		RF95.setModemConfig(RH_RF95::Bw125Cr45Sf128);
+		break;
+	case 1:
+		RF95.setModemConfig(RH_RF95::Bw500Cr45Sf128);
+		break;
+	case 2:
+		RF95.setModemConfig(RH_RF95::Bw31_25Cr48Sf512);
+		break;
+	case 3:
+		RF95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
+		break;
+	default:
+		RF95.setModemConfig(RH_RF95::Bw125Cr45Sf128);
+		break;
+		}
+	}
+
 void save_data()
 	{
 	if (write_time == 0)
@@ -424,7 +472,7 @@ void save_data()
 	else if (millis() - write_time > WRITE_INTERVAL)
 		{
 		write_time       = millis();
-		float notanumber = std::numeric_limits<float>::quiet_NaN();
+		float notanumber = 0.0f;
 		write_data_chunk_to_fram(
 		    millis(), rocket_state,
 		    kx134_accel_x, kx134_accel_y, kx134_accel_z,
@@ -435,9 +483,9 @@ void save_data()
 
 int debug_data()
 	{
-#ifdef ROCKET_DEBUGMODE
-
 	String data_string = "";
+
+#ifdef ROCKET_DEBUGMODE
 
 	if (debug_time == 0UL)
 		{
@@ -471,68 +519,22 @@ int debug_data()
 
 	save_data();
 
+	UDP_Send(data_string.c_str(), 500);
+
 	return EXIT_SUCCESS;
-	}
-
-void UDP_Send(const char Data[], uint16_t& Timeout)
-	{
-	RF95.send(reinterpret_cast<const uint8_t*>(Data), strlen(Data) + 1);
-	RF95.waitPacketSent(Timeout);
-	}
-
-const char* UDP_Receive(const uint16_t& Timeout)
-	{
-	RF95.waitAvailableTimeout(Timeout);
-	uint8_t Buffer[RF95_Max_message_length];
-	uint8_t Length = sizeof(Buffer);
-
-	return RF95.recv(Buffer, &Length) ? reinterpret_cast<const char*>(Buffer) : "";
-	}
-
-void RF95_Set_modem_config(const uint8_t& Index)
-	{
-	/*
-	LoRa Chirp Options:
-	typedef enum
-	{
-	    Bw125Cr45Sf128 = 0,	   //< Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on. Default medium range
-	    Bw500Cr45Sf128,	           //< Bw = 500 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on. Fast+short range
-	    Bw31_25Cr48Sf512,	   //< Bw = 31.25 kHz, Cr = 4/8, Sf = 512chips/symbol, CRC on. Slow+long range
-	    Bw125Cr48Sf4096,           //< Bw = 125 kHz, Cr = 4/8, Sf = 4096chips/symbol, CRC on. Slow+long range
-	} ModemConfigChoice;
-	*/
-	switch (Index)
-		{
-	case 0:
-		// this is default already
-		RF95.setModemConfig(RH_RF95::Bw125Cr45Sf128);
-		break;
-	case 1:
-		RF95.setModemConfig(RH_RF95::Bw500Cr45Sf128);
-		break;
-	case 2:
-		RF95.setModemConfig(RH_RF95::Bw31_25Cr48Sf512);
-		break;
-	case 3:
-		RF95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
-		break;
-	default:
-		RF95.setModemConfig(RH_RF95::Bw125Cr45Sf128);
-		break;
-		}
 	}
 
 // STANDARD ENTRY POINTS
 void setup()
 	{
-	const uint16_t RF95_reset { 30 };
-	pinMode(RF95_reset, OUTPUT);
-	digitalWrite(RF95_reset, HIGH);
-
 	Serial.begin(9600);
 	Wire.begin();
 
 	// ============= NO TOUCH =============
+	const uint16_t RF95_reset { 30 };
+	pinMode(RF95_reset, OUTPUT);
+	digitalWrite(RF95_reset, HIGH);
+
 	digitalWrite(RF95_reset, LOW);
 	delay(10);
 	digitalWrite(RF95_reset, HIGH);
@@ -544,7 +546,7 @@ void setup()
 	// do the reset for the radio
 	RF95.setFrequency(915.7);
 	RF95.setTxPower(23);
-	RF95_Set_modem_config(3);
+	RF95_Set_modem_config(2);
 
 	delay(5000);
 
@@ -582,8 +584,6 @@ void setup()
 	wdt.feed();
 
 	// TODO: add a method to read previous state from EEPROM and restore it
-
-	println("setup() exit");
 	}
 
 void loop()

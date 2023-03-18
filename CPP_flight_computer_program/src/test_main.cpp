@@ -3,11 +3,12 @@
 	#include "debug_macros.h"
 	#include "sensor_fram.h"
 	#include "package_fram.h"
-	#include "unity.h"
+	#include "sensor_led.h"
 
 
 void setup_test_sensor_fram()
 	{
+<<<<<<< HEAD
 		println("a");
 		init_fram();
 		println("b");
@@ -47,6 +48,9 @@ void setup_test_sensor_fram()
 
 		tearDown();
 
+=======
+	init_fram_package();
+>>>>>>> 7dacb326ba6e5689342138ed09b492f5c215c0bd
 	}
 
 void teardown_test_sensor_fram()
@@ -56,19 +60,67 @@ void teardown_test_sensor_fram()
 
 void test_sensor_fram()
 	{
-	setup_test_sensor_fram();
+	int test_cursor = FRAM_INIT_ADDRESS + 100;
+	fram_cursor     = FRAM_INIT_ADDRESS + 100;
+	int count       = 0;
 
-	// TODO: write test for fram
+	for (int i = FRAM_INIT_ADDRESS; i < FRAM_INIT_ADDRESS + 50; i += 25)
+		{
+		println("writing data chunk to fram at position: " + String(i));
+		write_data_chunk_to_fram(millis(), 6, 0.12f, 0.24f, 9.8f, 0.0f, 45.5f, 90.0f, 123.456f, 45000.75, 223.56f);
 
-	teardown_test_sensor_fram();
+		read_data_chunk_from_fram(i - 25);
+		println("reading data chunk from fram at position: " + String(i));
+
+		// print sensor chunk
+		println(sensor_chunk.timestamp);
+		println(sensor_chunk.current_state);
+		println(sensor_chunk.accl_x);
+		println(sensor_chunk.accl_y);
+		println(sensor_chunk.accl_z);
+		println(sensor_chunk.gyro_x);
+		println(sensor_chunk.gyro_y);
+		println(sensor_chunk.gyro_z);
+		println(sensor_chunk.rel_alt);
+		println(sensor_chunk.pressure);
+		println(sensor_chunk.thermocouple_temp);
+		}
+
+	for (int i = FRAM_INIT_ADDRESS; i < FRAM_INIT_ADDRESS + 50; i += 25)
+		{
+		read_data_chunk_from_fram(i);
+		println("reading data chunk from fram at position: " + String(i));
+
+		// print sensor chunk
+		println(sensor_chunk.timestamp);
+		println(sensor_chunk.current_state);
+		println(sensor_chunk.accl_x);
+		println(sensor_chunk.accl_y);
+		println(sensor_chunk.accl_z);
+		println(sensor_chunk.gyro_x);
+		println(sensor_chunk.gyro_y);
+		println(sensor_chunk.gyro_z);
+		println(sensor_chunk.rel_alt);
+		println(sensor_chunk.pressure);
+		println(sensor_chunk.thermocouple_temp);
+		}
 	}
 
 int test_main()
 	{
+	delay(1000);
 	println("[TESTMODE] tests starting");
+
 	println("testing fram...");
+<<<<<<< HEAD
     test_sensor_fram();
+=======
+	setup_test_sensor_fram();
+	test_sensor_fram();
+	teardown_test_sensor_fram();
+>>>>>>> 7dacb326ba6e5689342138ed09b492f5c215c0bd
 	println("testing fram...done");
+
 	println("[TESTMODE] tests completed");
 	exit(1);
 	}
