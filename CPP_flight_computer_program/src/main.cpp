@@ -583,6 +583,7 @@ void setup()
 	RF95.setTxPower(23);
 	RF95_Set_modem_config(2);
 
+	delay(5000);
 
 #if (TESTMODE == 1)
 	#warning "TESTMODE ENABLED"
@@ -622,9 +623,14 @@ void setup()
 
 void loop()
 	{
+<<<<<<< HEAD
 	set_led_green();
 	wdt.feed();
+=======
+	// write_temperature_to_fram(12.34);
+>>>>>>> 216eed061acb5b84fad8d21ce2d6a99b5548cb35
 	debug_data();
+	wdt.feed();
 	select_flight_mode(rocket_state);
 	set_led_red();
 	}

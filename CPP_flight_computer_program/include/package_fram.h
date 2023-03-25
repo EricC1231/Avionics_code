@@ -6,10 +6,12 @@
 #define WRITE_INTERVAL             500
 #define SENSOR_CHUNK_SIZE_IN_BYTES 25
 
+void reset_fram_cursor();
+
 int init_fram_package();
 int write_test_data_to_fram();
 int read_test_data_from_fram();
-
+void print_current_sensor_chunk(bool);
 int write_data_chunk_to_fram(uint32_t, uint8_t, float, float, float, float, float, float, float, float, float);
 int read_data_chunk_from_fram(uint32_t);
 void dump_fram_to_serial();

@@ -17,10 +17,17 @@ static uint32_t fram_cursor      = FRAM_INIT_ADDRESS;
 // definition of extern global sensor_chunk
 sensor_chunk_layout sensor_chunk = {};
 
+<<<<<<< HEAD
 /**
  * @brief Initialize the FRAM package
  * @return EXIT_SUCCESS if the initialization succeeded, EXIT_FAILURE otherwise.
  */
+=======
+void reset_fram_cursor(){
+	fram_cursor      = FRAM_INIT_ADDRESS;
+}
+
+>>>>>>> 216eed061acb5b84fad8d21ce2d6a99b5548cb35
 int init_fram_package()
 	{
 	return init_fram();
