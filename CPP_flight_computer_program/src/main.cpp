@@ -106,6 +106,7 @@ int init_all()
  */
 int health_check()
 	{
+	return EXIT_SUCCESS;
 	// KX134 checks
 	float z_thresh_high = 11.0;
 	float z_thresh_low  = 9.0;
@@ -173,6 +174,7 @@ int health_check()
  */
 void ground_idle_mode()
 	{
+	println("ground_idle");
 	set_led_green();
 
 	if (starting_time == 0)
@@ -205,6 +207,7 @@ void ground_idle_mode()
  */
 void powered_flight_mode()
 	{
+	println("powered flight ");
 	set_led_red();
 
 	// powered to unpowered flight is typical of deceleration
@@ -287,6 +290,7 @@ int apogee_check()
  */
 void unpowered_flight_mode()
 	{
+	println("unpowered flight");
 	set_led_blue();
 
 	if (apogee_check() == EXIT_SUCCESS)
@@ -302,6 +306,7 @@ void unpowered_flight_mode()
  */
 void soft_recovery_mode()
 	{
+	println("software recovery");
 	while (true)
 		{
 		wdt.feed(); // feeding the watchdog to avoid a reset
@@ -330,6 +335,7 @@ void soft_recovery_mode()
  */
 void ballistic_descent_mode()
 	{
+	println("ballistic descent");
 	rocket_altitude = get_bmp280_relative_altitude(ground_base_pressure, ground_base_altitude);
 
 	if (rocket_altitude <= PARACHUTE_DEPLOYMENT_HEIGHT)
@@ -344,6 +350,7 @@ void ballistic_descent_mode()
  */
 void chute_descent_mode()
 	{
+	println("chute descent");
 	// TODO: check gyroscope stabilisation over time
 	rocket_altitude = get_bmp280_relative_altitude(ground_base_pressure, ground_base_altitude);
 
@@ -360,6 +367,7 @@ void chute_descent_mode()
  */
 void land_safe_mode()
 	{
+	println("land safe");
 	if (starting_time == 0)
 		{
 		starting_time = millis();
@@ -436,6 +444,7 @@ void watchdog_callback()
  */
 int check_zombie_mode()
 	{
+	return EXIT_FAILURE;
 	if (digitalRead(PIN_A16) == HIGH)
 		{
 		return EXIT_SUCCESS;
@@ -542,6 +551,9 @@ int debug_data()
 	data_string            = data_string + String(kx134_accel_y) + ",";
 	data_string            = data_string + String(kx134_accel_z) + ",";
 
+println(kx134_accel_z);
+println(get_bmp280_pressure());
+
 	rocket_altitude        = get_bmp280_relative_altitude(ground_base_pressure, ground_base_altitude);
 	data_string            = data_string + String(rocket_altitude);
 
@@ -552,7 +564,7 @@ int debug_data()
 
 #endif // ROCKET_DEBUGMODE
 
-	save_data();
+	// save_data();
 
 	UDP_Send(data_string.c_str(), 500);
 
@@ -597,20 +609,20 @@ void setup()
 	// zombie mode ensures that the main loop()
 	// does not start running, overwriting previous
 	// data on the FRAM
-	if (check_zombie_mode() == EXIT_SUCCESS)
-		{
-		set_led_blue();
-		println("[ZOMBIE MODE] detected");
-		dump_fram_to_serial();
-		exit(0);
-		}
+	// if (check_zombie_mode() == EXIT_SUCCESS)
+	// 	{
+	// 	set_led_blue();
+	// 	println("[ZOMBIE MODE] detected");
+	// 	dump_fram_to_serial();
+	// 	exit(0);
+	// 	}
 
-	if (health_check() == EXIT_FAILURE)
-		{
-		set_led_red();
-		println("[FAILED] Health Check"); // also write to reserved fram space
-		exit(1);                          // this should also fail if init_all() fails;
-		}
+	// if (health_check() == EXIT_FAILURE)
+	// 	{
+	// 	set_led_red();
+	// 	println("[FAILED] Health Check"); // also write to reserved fram space
+	// 	exit(1);                          // this should also fail if init_all() fails;
+	// 	}
 
 	config.trigger  = WATCHDOG_TRIGGER;
 	config.timeout  = WATCHDOG_TIMEOUT;
@@ -618,17 +630,15 @@ void setup()
 	wdt.begin(config);
 	wdt.feed();
 
+	println("exti stup");
+
 	// TODO: add a method to read previous state from EEPROM and restore it
 	}
 
 void loop()
 	{
-<<<<<<< HEAD
+	println("loopy");
 	set_led_green();
-	wdt.feed();
-=======
-	// write_temperature_to_fram(12.34);
->>>>>>> 216eed061acb5b84fad8d21ce2d6a99b5548cb35
 	debug_data();
 	wdt.feed();
 	select_flight_mode(rocket_state);
